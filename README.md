@@ -1,32 +1,66 @@
-# React + TypeScript + Vite
+# Travel CRM Admin Portal
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Admin dashboard for managing a multi-tenant Travel CRM platform. It has a Vercel-style layout with a sidebar, top bar, light/dark theme and a tenant overview page.
 
-Currently, two official plugins are available:
+> **Status:** early development. Only the **Overview** (Tenants) page is built. Other sections show a placeholder.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Tech stack
 
-## React Compiler
+- [React 19](https://react.dev) + [TypeScript](https://www.typescriptlang.org)
+- [Vite](https://vite.dev) for dev server and build
+- [Tailwind CSS v4](https://tailwindcss.com) (configured in `src/index.css`)
+- [shadcn/ui](https://ui.shadcn.com) (`new-york` style) on [Radix UI](https://www.radix-ui.com)
+- [lucide-react](https://lucide.dev) icons
+- [Oxlint](https://oxc.rs) for linting
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Getting started
 
-## Expanding the Oxlint configuration
+Requires Node.js 20+ and npm.
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+The app runs at http://localhost:5173 by default.
+
+## Scripts
+
+| Command           | Description                         |
+| ----------------- | ----------------------------------- |
+| `npm run dev`     | Start the Vite dev server           |
+| `npm run build`   | Type-check and build for production |
+| `npm run preview` | Preview the production build        |
+| `npm run lint`    | Lint the project with Oxlint        |
+
+## Project structure
+
+```
+src/
+├── components/
+│   ├── ui/          # shadcn/ui primitives (button, card, table, tabs, ...)
+│   ├── Sidebar.tsx
+│   ├── Topbar.tsx
+│   ├── Overview.tsx
+│   └── ...          # tenant cards, usage panel, recent activity, etc.
+├── hooks/           # useTheme, useFocusHotkey
+├── lib/utils.ts     # cn() class-name helper
+├── data.ts          # mock data
+├── nav.ts           # sidebar navigation config
+├── App.tsx
+└── main.tsx
+```
+
+## Navigation sections
+
+Tenants (Overview), Users, Subscriptions, Logs, Analytics, Performance, Observability, Security, Infrastructure, Feature Flags, Domains, API Keys and Integrations.
+
+## Adding UI components
+
+This project uses shadcn/ui. Add components with:
+
+```bash
+npx shadcn@latest add <component>
+```
+
+They are written to `src/components/ui/`.
