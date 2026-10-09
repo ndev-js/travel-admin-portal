@@ -14,6 +14,7 @@ import {
   Users,
   type LucideIcon,
 } from 'lucide-react'
+import { PATHS } from './routes/paths'
 
 export type PageId =
   | 'tenants'
@@ -60,3 +61,11 @@ export const secondaryNav: NavItem[] = [
 export const pageLabel: Record<PageId, string> = Object.fromEntries(
   [...primaryNav, ...secondaryNav].map((item) => [item.id, item.label]),
 ) as Record<PageId, string>
+
+export const pagePath = (id: PageId) => PATHS[id]
+
+/** The nav page a URL belongs to, or undefined for URLs outside the nav (e.g. not found) */
+export function pageFromPath(pathname: string): PageId | undefined {
+  const root = `/${pathname.split('/')[1]}`
+  return (Object.keys(pageLabel) as PageId[]).find((id) => PATHS[id] === root)
+}

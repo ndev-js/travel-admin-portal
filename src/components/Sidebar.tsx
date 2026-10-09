@@ -18,11 +18,12 @@ import { Kbd } from '@/components/ui/kbd'
 import { cn } from '@/lib/utils'
 import { useFocusHotkey } from '../hooks/useFocusHotkey'
 import type { Theme } from '../hooks/useTheme'
-import { primaryNav, secondaryNav, type NavItem, type PageId } from '../nav'
+import { NavLink, useNavigate } from 'react-router'
+import { pagePath, primaryNav, secondaryNav, type NavItem } from '../nav'
+import { logout } from '../store/authSlice'
+import { useAppDispatch } from '../store/hooks'
 
 interface Props {
-  active: PageId
-  onNavigate: (id: PageId) => void
   /** Mobile drawer state; the sidebar is always visible from `lg` up */
   open: boolean
   onClose: () => void
@@ -32,26 +33,33 @@ interface Props {
 
 type Environment = 'production' | 'staging'
 
-function NavButton({ item, active, onClick }: { item: NavItem; active: boolean; onClick: () => void }) {
+function NavButton({ item, onClick }: { item: NavItem; onClick: () => void }) {
   const Icon = item.icon
   return (
-    <button
-      type="button"
+    <NavLink
+      to={pagePath(item.id)}
       onClick={onClick}
-      aria-current={active ? 'page' : undefined}
-      className={cn(
-        'group flex h-9 w-full items-center gap-3 rounded-lg px-3 text-sm text-foreground/80 transition-colors outline-none hover:bg-foreground/5 hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50',
-        active && 'bg-foreground/[0.08] font-medium text-foreground hover:bg-foreground/[0.08]',
-      )}
+      className={({ isActive }) =>
+        cn(
+          'group flex h-9 w-full items-center gap-3 rounded-lg px-3 text-sm text-foreground/80 transition-colors outline-none hover:bg-foreground/5 hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50',
+          isActive && 'bg-foreground/[0.08] font-medium text-foreground hover:bg-foreground/[0.08]',
+        )
+      }
     >
-      <Icon className={cn('size-4 shrink-0 text-muted-foreground group-hover:text-foreground', active && 'text-foreground')} />
-      <span className="flex-1 truncate text-left">{item.label}</span>
-      {item.expandable && <ChevronRight className="size-4 shrink-0 text-subtle-foreground" />}
-    </button>
+      {({ isActive }) => (
+        <>
+          <Icon className={cn('size-4 shrink-0 text-muted-foreground group-hover:text-foreground', isActive && 'text-foreground')} />
+          <span className="flex-1 truncate text-left">{item.label}</span>
+          {item.expandable && <ChevronRight className="size-4 shrink-0 text-subtle-foreground" />}
+        </>
+      )}
+    </NavLink>
   )
 }
 
-export function Sidebar({ active, onNavigate, open, onClose, theme, onThemeChange }: Props) {
+export function Sidebar({ open, onClose, theme, onThemeChange }: Props) {
+  const navigate = useNavigate()
+  const dispatch = useAppDispatch()
   const [query, setQuery] = useState('')
   const [env, setEnv] = useState<Environment>('production')
   const findRef = useRef<HTMLInputElement>(null)
@@ -69,11 +77,6 @@ export function Sidebar({ active, onNavigate, open, onClose, theme, onThemeChang
     const match = (items: NavItem[]) => (q ? items.filter((i) => i.label.toLowerCase().includes(q)) : items)
     return { primary: match(primaryNav), secondary: match(secondaryNav) }
   }, [query])
-
-  const go = (id: PageId) => {
-    onNavigate(id)
-    onClose()
-  }
 
   return (
     <>
@@ -131,7 +134,7 @@ export function Sidebar({ active, onNavigate, open, onClose, theme, onThemeChang
             <ul className="m-0 flex list-none flex-col gap-0.5 p-0">
               {primary.map((item) => (
                 <li key={item.id}>
-                  <NavButton item={item} active={active === item.id} onClick={() => go(item.id)} />
+                  <NavButton item={item} onClick={onClose} />
                 </li>
               ))}
             </ul>
@@ -143,7 +146,7 @@ export function Sidebar({ active, onNavigate, open, onClose, theme, onThemeChang
             <ul className="m-0 flex list-none flex-col gap-0.5 p-0">
               {secondary.map((item) => (
                 <li key={item.id}>
-                  <NavButton item={item} active={active === item.id} onClick={() => go(item.id)} />
+                  <NavButton item={item} onClick={onClose} />
                 </li>
               ))}
             </ul>
@@ -170,7 +173,11 @@ export function Sidebar({ active, onNavigate, open, onClose, theme, onThemeChang
             <p className="mt-1.5 text-[13px] leading-snug text-muted-foreground">
               3 tenants have failed payments. Their accounts will be suspended starting October 10, 2026.
             </p>
-            <Button variant="outline" className="mt-3 w-full" onClick={() => go('subscriptions')}>
+            <Button variant="outline" className="mt-3 w-full" onClick={() => {
+                navigate(pagePath('subscriptions'))
+                onClose()
+              }}
+            >
               Review billing
             </Button>
           </section>
@@ -201,7 +208,8 @@ export function Sidebar({ active, onNavigate, open, onClose, theme, onThemeChang
                 </DropdownMenuRadioGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>Account settings</DropdownMenuItem>
-                <DropdownMenuItem variant="destructive">Sign out</DropdownMenuItem>
+                <DropdownMenuItem variant="destructive" onSelect={() => dispatch(logout())}>
+                  Sign out</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
